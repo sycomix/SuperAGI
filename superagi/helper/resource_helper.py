@@ -26,7 +26,7 @@ class ResourceHelper:
         file_extension = os.path.splitext(file_name)[1][1:]
 
         if file_extension in ["png", "jpg", "jpeg"]:
-            file_type = "image/" + file_extension
+            file_type = f"image/{file_extension}"
         elif file_extension == "txt":
             file_type = "application/txt"
         else:
@@ -41,16 +41,27 @@ class ResourceHelper:
 
         if storage_type == StorageType.S3:
             file_name_parts = file_name.split('.')
-            file_name = file_name_parts[0] + '_' + str(datetime.datetime.now()).replace(' ', '') \
-                .replace('.', '').replace(':', '') + '.' + file_name_parts[1]
+            file_name = (
+                f'{file_name_parts[0]}_'
+                + str(datetime.datetime.now())
+                .replace(' ', '')
+                .replace('.', '')
+                .replace(':', '')
+                + '.'
+                + file_name_parts[1]
+            )
             path = 'input/' if (channel == "INPUT") else 'output/'
 
         logger.info(final_path)
-        resource = Resource(name=file_name, path=path + file_name, storage_type=storage_type.value, size=file_size,
-                            type=file_type,
-                            channel="OUTPUT",
-                            agent_id=agent_id)
-        return resource
+        return Resource(
+            name=file_name,
+            path=path + file_name,
+            storage_type=storage_type.value,
+            size=file_size,
+            type=file_type,
+            channel="OUTPUT",
+            agent_id=agent_id,
+        )
 
     @staticmethod
     def get_resource_path(file_name: str):
@@ -68,10 +79,14 @@ class ResourceHelper:
         root_dir = get_config('RESOURCES_OUTPUT_ROOT_DIR')
 
         if root_dir is not None:
-            root_dir = root_dir if root_dir.startswith("/") else os.getcwd() + "/" + root_dir
-            root_dir = root_dir if root_dir.endswith("/") else root_dir + "/"
+            root_dir = (
+                root_dir
+                if root_dir.startswith("/")
+                else f"{os.getcwd()}/{root_dir}"
+            )
+            root_dir = root_dir if root_dir.endswith("/") else f"{root_dir}/"
         else:
-            root_dir = os.getcwd() + "/"
+            root_dir = f"{os.getcwd()}/"
         return root_dir
 
     @staticmethod
@@ -81,10 +96,14 @@ class ResourceHelper:
         root_dir = get_config('RESOURCES_INPUT_ROOT_DIR')
 
         if root_dir is not None:
-            root_dir = root_dir if root_dir.startswith("/") else os.getcwd() + "/" + root_dir
-            root_dir = root_dir if root_dir.endswith("/") else root_dir + "/"
+            root_dir = (
+                root_dir
+                if root_dir.startswith("/")
+                else f"{os.getcwd()}/{root_dir}"
+            )
+            root_dir = root_dir if root_dir.endswith("/") else f"{root_dir}/"
         else:
-            root_dir = os.getcwd() + "/"
+            root_dir = f"{os.getcwd()}/"
         return root_dir
 
     @staticmethod
@@ -99,5 +118,4 @@ class ResourceHelper:
             root_dir = root_dir.replace("{agent_id}", str(agent_id))
             directory = os.path.dirname(root_dir)
             os.makedirs(directory, exist_ok=True)
-        final_path = root_dir + file_name
-        return final_path
+        return root_dir + file_name

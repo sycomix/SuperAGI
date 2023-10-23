@@ -41,7 +41,4 @@ def parse_feed(feed):
                     "time_difference": feed.time_difference}
         except Exception:
             return feed
-    if feed.role == "system":
-        return feed
-
     return feed

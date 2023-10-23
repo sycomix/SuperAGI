@@ -82,10 +82,14 @@ def get_agent(agent_config_id: int,
         HTTPException (Status Code=404): If the agent configuration is not found.
     """
 
-    db_agent_config = db.session.query(AgentConfiguration).filter(AgentConfiguration.id == agent_config_id).first()
-    if not db_agent_config:
+    if (
+        db_agent_config := db.session.query(AgentConfiguration)
+        .filter(AgentConfiguration.id == agent_config_id)
+        .first()
+    ):
+        return db_agent_config
+    else:
         raise HTTPException(status_code=404, detail="Agent Configuration not found")
-    return db_agent_config
 
 
 @router.put("/update", response_model=AgentConfigurationOut)

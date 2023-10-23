@@ -58,10 +58,9 @@ class JsonCleaner:
         Returns:
             str: The preprocessed json string.
         """
-        corrected_str = re.sub(
+        return re.sub(
             r'(?<!\\)\\(?!["\\/bfnrt]|u[0-9a-fA-F]{4})', r"\\\\", input_str
         )
-        return corrected_str
 
     @classmethod
     def extract_json_section(cls, input_str: str = ""):

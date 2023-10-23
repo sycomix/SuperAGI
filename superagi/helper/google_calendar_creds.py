@@ -19,42 +19,45 @@ class GoogleCalendarCreds:
         root_dir = get_config('RESOURCES_OUTPUT_ROOT_DIR')
         file_path = file_name
         if root_dir is not None:
-            root_dir = root_dir if root_dir.startswith("/") else os.getcwd() + "/" + root_dir
-            root_dir = root_dir if root_dir.endswith("/") else root_dir + "/"
+            root_dir = (
+                root_dir
+                if root_dir.startswith("/")
+                else f"{os.getcwd()}/{root_dir}"
+            )
+            root_dir = root_dir if root_dir.endswith("/") else f"{root_dir}/"
             file_path = root_dir + file_name
         else:
-            file_path = os.getcwd() + "/" + file_name
-        if os.path.exists(file_path):
-            engine = connect_db()
-            Session = sessionmaker(bind=engine)
-            session = Session()
-            resource_manager: FileManager = None
-            with open(file_path,'rb') as file:
-                creds = pickle.load(file)
-            if isinstance(creds, str):
-                creds = json.loads(creds)
-            expire_time = datetime.strptime(creds["expiry"], "%Y-%m-%dT%H:%M:%S.%fZ")
-            google_creds = session.query(ToolConfig).filter(ToolConfig.toolkit_id == toolkit_id).all()
-            client_id = ""
-            client_secret = ""
-            for credentials in google_creds:
-                credentials = credentials.__dict__
-                if credentials["key"] == "GOOGLE_CLIENT_ID":
-                    client_id = credentials["value"]
-                if credentials["key"] == "GOOGLE_CLIENT_SECRET":
-                    client_secret = credentials["value"]
-            creds = Credentials.from_authorized_user_info(info={
-                "client_id": client_id,
-                "client_secret": client_secret,
-                "refresh_token": creds["refresh_token"],
-                "scopes": "https://www.googleapis.com/auth/calendar"
-            })
-            if expire_time < datetime.utcnow():
-                creds.refresh(Request())
-                creds_json = creds.to_json()
-                resource_manager.write_file(file_name, creds_json)
-        else:
+            file_path = f"{os.getcwd()}/{file_name}"
+        if not os.path.exists(file_path):
             return {"success": False}
+        engine = connect_db()
+        Session = sessionmaker(bind=engine)
+        session = Session()
+        resource_manager: FileManager = None
+        with open(file_path,'rb') as file:
+            creds = pickle.load(file)
+        if isinstance(creds, str):
+            creds = json.loads(creds)
+        expire_time = datetime.strptime(creds["expiry"], "%Y-%m-%dT%H:%M:%S.%fZ")
+        google_creds = session.query(ToolConfig).filter(ToolConfig.toolkit_id == toolkit_id).all()
+        client_id = ""
+        client_secret = ""
+        for credentials in google_creds:
+            credentials = credentials.__dict__
+            if credentials["key"] == "GOOGLE_CLIENT_ID":
+                client_id = credentials["value"]
+            if credentials["key"] == "GOOGLE_CLIENT_SECRET":
+                client_secret = credentials["value"]
+        creds = Credentials.from_authorized_user_info(info={
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "refresh_token": creds["refresh_token"],
+            "scopes": "https://www.googleapis.com/auth/calendar"
+        })
+        if expire_time < datetime.utcnow():
+            creds.refresh(Request())
+            creds_json = creds.to_json()
+            resource_manager.write_file(file_name, creds_json)
         service = build('calendar','v3',credentials=creds)
         return {"success": True, "service": service}
 

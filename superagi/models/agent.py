@@ -105,7 +105,7 @@ class Agent(DBBaseModel):
             return value
         elif key in ["project_id", "memory_window", "max_iterations", "iteration_interval"]:
             return int(value)
-        elif key == "goal" or key == "constraints" or key == "instruction":
+        elif key in ["goal", "constraints", "instruction"]:
             return eval(value)
         elif key == "tools":
             return [int(x) for x in json.loads(value)]
@@ -191,9 +191,12 @@ class Agent(DBBaseModel):
         configs = db.session.query(AgentTemplateConfig).filter(
             AgentTemplateConfig.agent_template_id == agent_template.id).all()
 
-        agent_configurations = []
-        for config in configs:
-            agent_configurations.append(AgentConfiguration(agent_id=db_agent.id, key=config.key, value=config.value))
+        agent_configurations = [
+            AgentConfiguration(
+                agent_id=db_agent.id, key=config.key, value=config.value
+            )
+            for config in configs
+        ]
         db.session.add_all(agent_configurations)
         db.session.commit()
         db.session.flush()
@@ -223,9 +226,10 @@ class Agent(DBBaseModel):
         db.session.flush()  # Flush pending changes to generate the agent's ID
         db.session.commit()
 
-        agent_configurations = []
-        for key, value in agent_template["configs"].items():
-            agent_configurations.append(AgentConfiguration(agent_id=db_agent.id, key=key, value=value["value"]))
+        agent_configurations = [
+            AgentConfiguration(agent_id=db_agent.id, key=key, value=value["value"])
+            for key, value in agent_template["configs"].items()
+        ]
         db.session.add_all(agent_configurations)
         db.session.commit()
         db.session.flush()
@@ -243,5 +247,8 @@ class Agent(DBBaseModel):
 
         """
         project = session.query(Project).filter(Project.id == self.project_id).first()
-        organisation = session.query(Organisation).filter(Organisation.id == project.organisation_id).first()
-        return organisation
+        return (
+            session.query(Organisation)
+            .filter(Organisation.id == project.organisation_id)
+            .first()
+        )

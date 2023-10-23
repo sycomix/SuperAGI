@@ -42,7 +42,10 @@ class AgentConfiguration(DBBaseModel):
                 tool = session.query(Tool).filter(Tool.id == tool.id).first()
                 if tool is None:
                     # Tool does not exist, throw 404
-                    raise HTTPException(status_code=404, detail=f"Tool does not exist. 404 Not Found.")
+                    raise HTTPException(
+                        status_code=404,
+                        detail="Tool does not exist. 404 Not Found.",
+                    )
                 else:
                     agent_toolkit_tools.append(tool.id)
         return agent_toolkit_tools

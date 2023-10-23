@@ -8,7 +8,7 @@ class CustomLogRecord(logging.LogRecord):
 
         frame = inspect.currentframe().f_back
         while frame:
-            if frame.f_globals['__name__'] != __name__ and frame.f_globals['__name__'] != 'logging':
+            if frame.f_globals['__name__'] not in [__name__, 'logging']:
                 break
             frame = frame.f_back
 
@@ -52,27 +52,27 @@ class Logger(metaclass=SingletonMeta):
 
     def debug(self, message, *args):
         self.logger.debug(message)
-        if len(args) > 0:
+        if args:
             self.logger.debug(*args)
 
     def info(self, message, *args):
         self.logger.info(message)
-        if len(args) > 0:
+        if args:
             self.logger.info(*args)
 
     def warning(self, message, *args):
         self.logger.warning(message)
-        if len(args) > 0:
+        if args:
             self.logger.warning(*args)
 
     def error(self, message, *args):
         self.logger.error(message)
-        if len(args) > 0:
+        if args:
             self.logger.error(*args)
 
     def critical(self, message, *args):
         self.logger.critical(message)
-        if len(args) > 0:
+        if args:
             self.logger.critical(*args)
 
 

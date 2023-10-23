@@ -91,9 +91,4 @@ class OpenAi(BaseLlm):
         Returns:
             dict: The response.
         """
-        response = openai.Image.create(
-            prompt=prompt,
-            n=num,
-            size=f"{size}x{size}"
-        )
-        return response
+        return openai.Image.create(prompt=prompt, n=num, size=f"{size}x{size}")

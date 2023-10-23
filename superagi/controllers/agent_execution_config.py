@@ -26,11 +26,14 @@ def get_agent_execution_configuration(agent_execution_id: int,
         HTTPException (status_code=404): If the agent is not found.
     """
 
-    agent_execution_config = db.session.query(AgentExecutionConfiguration).filter(
-        AgentExecutionConfiguration.agent_execution_id == agent_execution_id
-    ).all()
-    if not agent_execution_config:
+    if (
+        agent_execution_config := db.session.query(AgentExecutionConfiguration)
+        .filter(
+            AgentExecutionConfiguration.agent_execution_id
+            == agent_execution_id
+        )
+        .all()
+    ):
+        return {result.key: eval(result.value) for result in agent_execution_config}
+    else:
         raise HTTPException(status_code=404, detail="Agent Execution Configuration not found")
-    response = {result.key: eval(result.value) for result in agent_execution_config}
-
-    return response

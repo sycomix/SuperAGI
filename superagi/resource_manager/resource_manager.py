@@ -27,9 +27,7 @@ class ResourceManager:
         """
         if file_path is None:
             raise Exception("file_path must be provided")
-        documents = SimpleDirectoryReader(input_files=[file_path]).load_data()
-
-        return documents
+        return SimpleDirectoryReader(input_files=[file_path]).load_data()
 
     def create_llama_document_s3(self, file_path: str):
         """
@@ -51,7 +49,7 @@ class ResourceManager:
         bucket_name = get_config("BUCKET_NAME")
         file = s3.get_object(Bucket=bucket_name, Key=file_path)
         file_name = file_path.split("/")[-1]
-        save_directory = ResourceHelper.get_root_input_dir() + "/"
+        save_directory = f"{ResourceHelper.get_root_input_dir()}/"
         file_path = save_directory + file_name
         with open(file_path, "wb") as f:
             contents = file['Body'].read()

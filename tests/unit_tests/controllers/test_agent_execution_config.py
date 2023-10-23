@@ -11,9 +11,7 @@ client = TestClient(app)
 
 @pytest.fixture
 def mocks():
-    # Mock tool kit data for testing
-    mock_execution_config = AgentExecutionConfiguration(id=1, key="test_key", value="['test']")
-    return mock_execution_config
+    return AgentExecutionConfiguration(id=1, key="test_key", value="['test']")
 
 
 def test_get_agent_execution_configuration_success(mocks):
